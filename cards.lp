@@ -1,4 +1,4 @@
-#include 'rulesN.lp'.
+#include 'rules.lp'.
 
 _supertype_type(legendary).
 _supertype_type(snow).
@@ -58,7 +58,9 @@ _bcounter_type(popo).
      P2 = _player([], [], [], 40, [], []),
      S = _state([Sp], [], [], [], [], [P,P2], [end], P),
      _state_type(S),
-     transition(S, draw, [P], SN).
+     _transition(S, draw, [P], SN),
+     SN = _state(_, _, _, _, _, _, _, PN),
+     _transition(SN, discard, [PN], SNN).
     
 
 % # % ?-     C3 = _card_type('Ancestral Recall', [u], [], [instant], [], [draw, draw, draw], nil),
