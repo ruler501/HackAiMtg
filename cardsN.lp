@@ -45,18 +45,18 @@ _phase_type(postmain).
 _phase_type(end).
 _phase_type(cleanup).
 
-?- C = _card_type('Mana Vault', [1], [], [artifact], [], [], nil),
-    C2 = _card_type('Rout', [1,1,1,w,w], [], [sorcery], [], [], nil),
-    C1 = _card_type('Abolish', [1,w,w], [], [instant], [], [], nil),
-    P = _player_type([C,C2], [], [C1], 40, [], []),
-    P2 = _player_type([], [], [], 40, [], []),
-    S = _state_type([], [], [], [], [], [P,P2], [end], P),
-    transition(S, phase, [], SN).
-    % transition(S, phase, [], SN).
-    % S = _state_type([], _, _, _, _, _, [end], P),
-    % P = _player_type(H, _, _, _, _, _),
-    % _len(H, N),
-    % N > 1,
-    % _select(Cn, H, _),
-    % transition(S, discard, [P, Cn], SS).
-    % transition(SS, phase, [], SN).
+ ?- C = _card_type('Mana Vault', [1], [], [artifact], [], [], nil),
+     C2 = _card_type('Rout', [1,1,1,w,w], [], [sorcery], [], [], nil),
+     C1 = _card_type('Abolish', [1,w,w], [], [instant], [], [], nil),
+     C3 = _card_type('Ancestral Recall', [u], [], [instant], [], [draw, draw, draw], nil),
+     Sp = _spell_type(C3, P, P, [P, P, P]),
+     P = _player_type([C,C2], [], [C1], 40, [], []),
+     P2 = _player_type([], [], [], 40, [], []),
+     % _stack_elem_list([S]),
+     S = _state_type([Sp], [], [], [], [], [P,P2], [end], P).
+     % _transition(S, discard, [P, _], SN).
+    
+
+% ?-     C3 = _card_type('Ancestral Recall', [u], [], [instant], [], [draw, draw, draw], nil),
+%      S = _spell_type(C3, P, P, [P, P, P]),
+%      P = _player_type([], [C3, C3, C3], [], 40, [], []).
