@@ -141,6 +141,116 @@ cost(dictate_of_erebos, [1,1,1,b,b]).
 type(dictate_of_erebos, enchantment).
 effects(dictate_of_erebos, []).
 
+% Fathom Feeder
+name(fathom_feeder, 'Fathom Feeder').
+cost(fathom_feeder, [u,b]).
+type(fathom_feeder, creature).
+subtype(fathom_feeder, eldrazi).
+subtype(fathom_feeder, drone).
+effect(fathom_feeder, []).
+
+% Oblivion Sower
+name(oblivion_sower, 'Oblivion Sower').
+cost(oblivion_sower, [1,1,1,1,1,1]).
+type(oblivion_sower, creature).
+subtype(oblivion_sower, eldrazi).
+effect(oblivion_sower, []).
+
+% Sire of Stagnation
+name(sire_of_stagnation, 'Sire of Stagnation').
+cost(sire_of_stagnation, [1,1,1,1,u,b]).
+type(sire_of_stagnation, creature).
+subtype(sire_of_stagnation, eldrazi).
+effect(sire_of_stagnation, []).
+
+% Sludge Crawler
+name(sludge_crawler, 'Sludge Crawler').
+cost(sludge_crawler, [b]).
+type(sludge_crawler, creature).
+subtype(sludge_crawler, eldrazi).
+subtype(sludge_crawler, drone).
+effect(sludge_crawler, []).
+
+% Wasteland Strangler
+name(wasteland_strangler, 'Wasteland Strangler').
+cost(wasteland_strangler, [1,1,b]).
+type(wasteland_strangler, creature).
+subtype(wasteland_strangler, eldrazi).
+subtype(wasteland_strangler, processor).
+effect(wasteland_strangler, []).
+
+% Sunken Hollow
+name(sunken_hollow, 'Sunken Hollow').
+cost(sunken_hollow, []).
+type(sunken_hollow, land).
+subtype(sunken_hollow, island).
+subtype(sunken_hollow, swamp).
+effect(sunken_hollow, []).
+
+% Mortuary Mire
+name(mortuary_mire, 'Mortuary Mire').
+cost(mortuary_mire, []).
+type(mortuary_mire, land).
+effect(mortuary_mire, []).
+
+% Anticipate
+name(anticipate, 'Anticipate').
+cost(anticipate, [1,u]).
+type(anticipate, instant).
+effect(anticipate, []).
+
+% Ruinous Path
+name(ruinous_path, 'Ruinous Path').
+cost(ruinous_path, [1,b,b]).
+type(ruinous_path, sorcery).
+effect(ruinous_path, []).
+
+% Hedron Archive
+name(hedron_archive, 'Hedron Archive').
+cost(hedron_archive, [1,1,1,1]).
+type(hedron_archive, artifact).
+effect(hedron_archive, []).
+
+% Plains
+name(plains, 'Plains').
+cost(plains, []).
+type(plains, land).
+supertype(plains, basic).
+subtype(plains, plains).
+effect(plains, []).
+
+% Island
+name(island, 'Island').
+cost(island, []).
+type(island, land).
+supertype(island, basic).
+subtype(island, island).
+effect(island, []).
+
+% Swamp
+name(swamp, 'Swamp').
+cost(swamp, []).
+type(swamp, land).
+supertype(swamp, basic).
+subtype(swamp, swamp).
+effect(swamp, []).
+
+% Mountain
+name(mountain, 'Mountain').
+cost(mountain, []).
+type(mountain, land).
+supertype(mountain, basic).
+subtype(mountain, mountain).
+effect(mountain, []).
+
+% Forest
+name(forest, 'Forest').
+cost(forest, []).
+type(forest, land).
+supertype(forest, basic).
+subtype(forest, forest).
+effect(forest, []).
+
 controller(capsize, jim).
 owner(capsize, jim).
 controller(abolish, jim).
