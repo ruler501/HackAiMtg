@@ -1,249 +1,239 @@
-% Eventually need to add owners
-% Eventually need to add tapped
+_state_type(X) :- X = _state(S, E, C, B, A, P, Ph, Ap), _state(S, E, C, B, A, P, Ph, Ap).
+_state(Stack, Exile, Command, Battlefield, Ante, Players, Phases, ActivePlayer) :-
+    _stack_elem_list(Stack),
+    _card_list(Exile),
+    _command_elem_list(Command),
+    _permanent_list(Battlefield),
+    _card_list(Ante),
+    _players_list_ne(Players),
+    _phase_list_ne(Phases),
+    _player_type(ActivePlayer),
+    _member(ActivePlayer, Players).
+    
 
-#include 'cards.lp'.
+_phase_list_ne([H]) :- _phase_type(H).
+_phase_list_ne([H|T]) :- _phase_type(H), _phase_list_ne(T).
 
-% Non checked accessors
-_name(X) :- name(X, _).
-_lifecount(X) :- lifecount(X, _).
-% Need type checking
-_type(X) :- type(X, _).
-% What are these?
-_effects(X) :- effects(X, _).
+_players_list_ne([H]) :- _player_type(H).
+_players_list_ne([H|P]) :- _player_type(H), _players_list_ne(P).
 
-% Controller Member
-_controller(X) :- controller(X, P), _player_type(P).
-
-% Owner Member(Not currently type checked),
-_owner(X) :- owner(X, _).
-owner(X, P) :- library(P, L), member(X, L).
-owner(X, P) :- graveyard(P, G), member(X, G).
-owner(X, P) :- hand(P, H), member(X, H).
-
-% Battlefield Counters
-_bcounters(X) :- bcounters(X, L), _bcounter_list(L).
-_bcounter_list([]).
-_bcounter_list([H|T]) :- _bcounter_type(H), _bcounter_list(T).
-
-% Player Counters
-_pcounters(X) :- pcounters(X, L), _pcounter_list(L).
-_pcounter_list([]).
-_pcounter_list([H|T]) :- _pcounter_type(H), _pcounter_list(T).
-
-% Tapped State
-_tapped(X) :- tapped(X, true).
-_tapped(X) :- tapped(X, false).
-
-% Mana Pool and Costs
-% Manapool should not have generic mana in it
-_manapool(X) :- manapool(X, L), _mana_list(L).
-_cost(X) :- cost(X, L), _mana_list(L).
-_mana_list([]).
-_mana_list([H|T]) :- _mana_type(H), _mana_list(T).
-_mana_type(1).
-_mana_type(w).
-_mana_type(u).
-_mana_type(b).
-_mana_type(r).
-_mana_type(g).
-_mana_type(c).
-
-card_type(Owner, Name, Cost, Type, Effects) :- 
-    Cost = manapool_type(L).
-
-% Card
-_card_type(X) :-
-    _owner(X),
-    _name(X),
-    _cost(X),
-    _type(X),
-    _effects(X).
 _card_list([]).
 _card_list([H|T]) :- _card_type(H), _card_list(T).
 
-% Token
-_token_type(X) :-
-    _owner(X),
-    _name(X),
-    _cost(X),
-    _type(X),
-    _effects(X),
-    not _card_type(X).
-
-% PermanentCard
-_permanent_card_type(X) :- _card_type(X), type(X, artifact).
-_permanent_card_type(X) :- _card_type(X), type(X, creature).
-_permanent_card_type(X) :- _card_type(X), type(X, enchantment).
-_permanent_card_type(X) :- _card_type(X), type(X, land).
-_permanent_card_type(X) :- _card_type(X), type(X, planeswalker).
-
-% Spell
-_spell_type(X) :- 
-    _card_type(X),
-    _controller(X).
-
-% Ability
-_ability_type(X) :-
-    _effects(X),
-    _controller(X),
-    not _owner(X),
-    not _name(X).
-
-% Emblem
-_emblem_type(X) :-
-    _owner(X),
-    _effects(X),
-    _controller(X),
-    not _name(X).
-
-% Hand member
-_hand(X) :- hand(X, H), _card_list(H).
-
-% Library member
-_library(X) :- library(X, L), _card_list(L).
-
-% Graveyard member
-_graveyard(X) :- graveyard(X, G), _card_list(G).
-
-% Stack member
-_stack(X) :- stack(X, S), _stack_elem_list(S).
 _stack_elem_type(X) :- _spell_type(X).
 _stack_elem_type(X) :- _ability_type(X).
 _stack_elem_list([]).
 _stack_elem_list([H|T]) :- _stack_elem_type(H), _stack_elem_list(T).
 
-% Exile member
-_exile(X) :- exile(X, E), _card_list(E).
-
-% Command member
-_command(X) :- command(X, C), _command_elem_list(C).
-_command_elem_type(X) :- _card_type(X).
-_command_elem_type(X) :- _emblem_type(X).
 _command_elem_list([]).
 _command_elem_list([H|T]) :- _command_elem_type(H), _command_elem_list(T).
+_command_elem_type(X) :- _emblem_type(X).
+_command_elem_type(X) :- _card_type(X).
 
-% Permanent
-_permanent_type(X) :- _permanent_card_type(X), _bcounters(X), _controller(X).
-_permanent_type(X) :- _token_type(X), _bcounters(X), _controller(X), _tapped(X).
+_player_type(X) :- X = _player(H, L, G, Lc, M, P), _player(H, L, G, Lc, M, P).
+_player(Hand, Library, Graveyard, _, ManaPool, PCounters) :-
+    _card_list(Hand),
+    _card_list(Library),
+    _card_list(Graveyard),
+    _mana_list(ManaPool),
+    _pcounter_list(PCounters).
+
+_pcounter_list([]).
+_pcounter_list([H|T]) :- _pcounter_type(H), _pcounter_list(T).
+
+_spell_type(X) :- X = _spell(C, Co, Ow, T), _spell(C, Co, Ow, T).
+_spell(S, Controller, Owner, Targets) :-
+    _card_type(S),
+    S = _card(_, _, _, _, _, E, _),
+    _player_type(Controller),
+    _player_type(Owner),
+    _len(Targets, N),
+    _len(E, N).
+
+_ability_type(X) :- X = _ability(E, C, T), _ability(E, C, T).
+_ability(Effects, Controller, Targets) :-
+    _effect_list(Effects),
+    _player_type(Controller),
+    _len(Effects, N),
+    _len(Targets, N).
+
+_effect_list([]).
+_effect_list([H|T]) :- _effect_type(H), _effect_list(T).
+_effect_type(draw).
+_effect_type(discard).
+
+_card_type(X) :- X = _card(N, C, S, T, Su, E, O), _card(N, C, S, T, Su, E, O).
+_card(_, Cost, Supertypes, Types, Subtypes, Effects, _) :-
+    _mana_list(Cost),
+    _supertype_list(Supertypes),
+    _type_list_ne(Types),
+    _subtype_list(Subtypes),
+    _effect_list(Effects).
+
+_supertype_list([]).
+_supertype_list([H|T]) :- _supertype_type(H), _supertype_list(T).
+
+_type_list_ne([H]) :- _type_type(H).
+_type_list_ne([H|T]) :- _type_type(H), _type_list_ne(T).
+
+_subtype_list([]).
+_subtype_list([H|T]) :- _subtype_type(H), _subtype_list(T).
+
+_emblem_type(X) :- X = _emblem(E, C, O), _emblem(E, C, O).
+_emblem(Effects, Controller, Owner) :-
+    _effect_list(Effects),
+    _player_type(Controller),
+    _player_type(Owner).
+
+_permanent_type(X) :- X = _permanent(P, B, C, T), _permanent(P, B, C, T).
+_permanent_type(P, BCounters, Controller, Tapped) :-
+    _permanent_card_type(P),
+    _bcounter_list(BCounters),
+    _player_type(Controller),
+    _bool_type(Tapped).
+_permanent_type(X, BCounters, Controller, Tapped) :-
+    _token_type(X),
+    _bcounter_list(BCounters),
+    _player_type(Controller),
+    _bool_type(Tapped).
 _permanent_list([]).
 _permanent_list([H|T]) :- _permanent_type(H), _permanent_list(T).
 
-% Battlefield
-_battlefield(X) :- battlefield(X, B), _permanent_list(B).
+_bcounter_list([]).
+_bcounter_list([H|T]) :- _bcounter_type(H), _bcounter_list(T).
+_bool_type(true).
+_bool_type(false).
 
-% Ante
-_ante(X) :- ante(X, A), _card_list(A).
+_permanent_card_type(Card) :-
+    _card_type(Card),
+    Card = _card(_, _, _, L, _, _, _),
+    _contain(L, [artifact, creature, enchantment, land, planeswalker, tribal]).
 
-% Player
-_player_type(X) :-
-    _hand(X),
-    _library(X),
-    _graveyard(X),
-    _lifecount(X),
-    _manapool(X),
-    _pcounters(X).
-_player_list_ne([X]) :- _player_type(X).
-_player_list_ne([H|T]) :- _player_type(H), _player_list_ne(T).
-_players(X) :- players(X, P), _player_list_ne(P).
+_token_type(X) :- X = _token(N, C, S, T, Su, E, O), _token(N, C, S, T, Su, E, O).
+_token(_, Cost, Supertypes, Types, Subtypes, Effects, _) :-
+    _mana_list(Cost),
+    _supertype_list(Supertypes),
+    _types_list(Types),
+    _subtypes_list(Subtypes),
+    _effect_list(Effects).
 
-% State
-_state_type(X) :- 
-    _stack(X),
-    _exile(X),
-    _command(X),
-    _battlefield(X),
-    _ante(X),
-    _players(X).
+_mana_list([]).
+_mana_list([H|T]) :- _mana_type(H), _mana_list(T).
 
 % Utility Functions
 _snoc([], H, [H]).
 _snoc([H|T], X, [H|R]) :- _snoc(T, X, R).
 
-member(X, [X|T]).
-member(X, [Y|T]) :- member(X, T).
+_member(X, [X|_]).
+_member(X, [_|T]) :- _member(X, T).
 
-swap(_, _, [], []).
-swap(X, Y, [X|T1], [Y|T2]) :- swap(X, Y, [X|T1], [Y|T2]).
-swap(X, Y, [H1|T1], [H1|T2]) :- H1 \= X1, swap(X, Y, T1, T2).
+_swap(X, Y, [X|T1], [Y|T2]) :- T1 = T2.
+_swap(X, Y, [H1|T1], [H1|T2]) :- _swap(X, Y, T1, T2).
 
-contain([], _).
-contain([H|T], L) :- member(H, L), contain(T, L).
+_contain([], _).
+_contain([H|T], L) :- _member(H, L), _contain(T, L).
 
-_assertSame([], X, XN).
-_assertSame([stack|T], X, XN) :- 
-    stack(X, E),
-    stack(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([exile|T], X, XN) :- 
-    exile(X, E),
-    exile(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([command|T], X, XN) :- 
-    command(X, E),
-    command(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([battlefield|T], X, XN) :-
-    battlefield(X, E),
-    battlefield(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([ante|T], X, XN) :-
-    ante(X, E),
-    ante(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([players|T], X, XN) :-
-    players(X, E),
-    players(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([hand|T], X, XN) :-
-    hand(X, E),
-    hand(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([library|T], X, XN) :-
-    library(X, E),
-    library(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([graveyard|T], X, XN) :-
-    graveyard(X, E),
-    graveyard(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([lifecount|T], X, XN) :-
-    lifecount(X, E),
-    lifecount(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([manapool|T], X, XN) :-
-    manapool(X, E),
-    manapool(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([pcounters|T], X, XN) :-
-    pcounters(X, E),
-    pcounters(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([bcounters|T], X, XN) :-
-    bcounters(X, E),
-    bcounters(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([controller|T], X, XN) :-
-    controller(X, E),
-    controller(XN, E),
-    _assertSame(T, X, XN).
-_assertSame([tapped|T], X, XN) :-
-    tapped(X, E),
-    tapped(XN, E),
-    _assertSame(T, X, XN).
+_select(X, [X|T], T).
+_select(X, [H|T], [H|Y]) :- _select(X, T, Y).
 
-transition(S, draw, P, SN) :-
+_len([], 0).
+_len([_|T], N) :- _len(T, N1), N is N1 + 1.
+
+_equal_change(X, X, Y, Y).
+_equal_change(_, Y, _, Y).
+
+% _transition(S, swap, [X, Y], SN) :-
+%     S = _state_type(Stack, Exile, Command, Battlefield, Ante, Players, Phases, ActivePlayer),
+%     _swap(X, Y, Stack, StackN),
+%     _swap(X, Y, Exile, ExileN),
+%     _swap(X, Y, Command, Command)
+
+_transition(S, draw, [P], SN) :-
     _state_type(S),
-    _state_type(SN),
     _player_type(P),
-    _assertSame([stack, exile, battlefield, command, ante], S, SN),
-    players(S, Ps),
-    member(P, Ps),
-    library(P, [C|L]),
-    hand(P, H),
-    hand(PN, [C|H]),
-    library(PN, L),
+    S = _state(St, E, C, B, A, Ps, Ph, Ap),
+    _member(P, Ps),
+    P = _player(H, [D|L], G, Li, M, Pc),
+    PN = _player([D|H], L, G, Li, M, Pc),
     _player_type(PN),
-    assertSame([graveyard, lifecount, manapool, pcounters], P, PN),
-    swap(P, PN, Ps, PNs),
-    players(SN, PNs).
+    _swap(P, PN, Ps, PNs),
+    _equal_change(P, Ap, PN, ApN),
+    SN = _state(St, E, C, B, A, PNs, Ph, ApN),
+    _state_type(SN).
 
+_transition(S, discard, [P], SN) :-
+    _transition(S, discard, [P, _], SN).
+
+_transition(S, discard, [P, C], SN) :-
+    _state_type(S),
+    _player_type(P),
+    S = _state(St, E, Cz, B, A, Ps, Ph, Ap),
+    _member(P, Ps),
+    P = _player(H, L, G, Li, M, Pc),
+    _member(C, H),
+    _select(C, H, HN),
+    PN = _player(HN, L, [C|G], Li, M, Pc),
+    _player_type(PN), 
+    _swap(P, PN, Ps, PNs),
+    _equal_change(P, Ap, PN, ApN),
+    SN = _state(St, E, Cz, B, A, PNs, Ph, ApN),
+    _state_type(SN).
+
+_transition(S, phase, [], SN) :-
+    _state_type(S),
+    S = _state([], E, C, B, A, [P|Ps], [upkeep], P),
+    SS = _state([], E, C, B, A, [P|Ps], [draw], P),
+    _state_type(SS),
+    _transition(SS, draw, [P], SN),
+    _state_type(SN).
+
+_transition(S, phase, [], SN) :-
+    _state_type(S),
+    S = _state([], E, C, B, A, [P1, P2|T], [cleanup], P1),
+    _snoc(T, P1, TN),
+    SN = _state([], E, C, B, A, [P2|TN], [untap], P2),
+    _state_type(SN).
+
+% Also end EOT effects and remove damage
+_transition(S, phase, [], SN) :-
+    _state_type(S),
+    S = _state([], E, C, B, A, [P|Ps], [end], P),
+    P = _player(H, _, _, _, _, _),
+    _len(H, N),
+    N < 2,
+    SN = _state([], E, C, B, A, [P|Ps], [cleanup], P),
+    _state_type(SN).
+_transition(S, phase, [], SN) :-
+    _state_type(S),
+    S = _state([], _, _, _, _, _, [end], P),
+    P = _player(H, _, _, _, _, _),
+    _len(H, N),
+    N > 1,
+    _select(Cn, H, _),
+    _transition(S, discard, [P, Cn], SS),
+    _transition(SS, phase, [], SN),
+    _state_type(SN).
+
+_transition(S, resolve, [], SN) :-
+    _state_type(S),
+    S = _state([Sp|St], E, C, B, A, P, Ph, Ap),
+    Sp = _spell(_, _, _, []),
+    _spell_type(Sp),
+    SN = _state(St, E, C, B, A, P, Ph, Ap),
+    _state_type(SN).
+
+_transition(S, resolve, [], SN) :-
+    _state_type(S),
+    S = _state([Sp|_], _, _, _, _, _, _, _),
+    Sp = _spell(C, Cn, Ow, [T|Ts]),
+    C = _card(N, Co, SupT, Ty, SubT, [Ef|Es], OwC),
+    _transition(S, Ef, [T], SS),
+    SS = _state([Sp|St], E, Cz, B, A, Ps, Ph, Ap),
+    _state_type(SS),
+    CN = _card(N, Co, SupT, Ty, SubT, Es, OwC),
+    _card_type(CN),
+    SpN = _spell(CN, Cn, Ow, Ts),
+    _spell_type(SpN),
+    SSS = _state([SpN|St], E, Cz, B, A, Ps, Ph, Ap),
+    _state_type(SSS),
+    _transition(SSS, resolve, [], SN).

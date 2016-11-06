@@ -1,5 +1,5 @@
-_state_type(X) :- X = _state_type(_, _, _, _, _, _, _, _).
-_state_type(Stack, Exile, Command, Battlefield, Ante, Players, Phases, ActivePlayer) :-
+_state_type(X) :- X = _state(_, _, _, _, _, _, _, _), X.
+_state(Stack, Exile, Command, Battlefield, Ante, Players, Phases, ActivePlayer) :-
     _stack_elem_list(Stack),
     _card_list(Exile),
     _command_elem_list(Command),
@@ -9,20 +9,26 @@ _state_type(Stack, Exile, Command, Battlefield, Ante, Players, Phases, ActivePla
     _phase_list_ne(Phases),
     _player_type(ActivePlayer),
     _member(ActivePlayer, Players).
+    
 
 _phase_list_ne([H]) :- _phase_type(H).
 _phase_list_ne([H|T]) :- _phase_type(H), _phase_list_ne(T).
 
-_players_list_ne([H]) :- H = _player_type(_, _, _, _, _, _).
-_players_list_ne([H|P]) :- H = _player_type(_, _, _, _, _, _), _players_list_ne(P).
+_players_list_ne([H]) :- _player_type(H).
+_players_list_ne([H|P]) :- _player_type(H), _players_list_ne(P).
 
-_stack_elem_type(X) :- X = _spell_type(_, _, _).
-_stack_elem_type(X) :- X = _ability_type(_, _).
+_stack_elem_type(X) :- _spell_type(X).
+_stack_elem_type(X) :- _ability_type(X).
 _stack_elem_list([]).
 _stack_elem_list([H|T]) :- _stack_elem_type(H), _stack_elem_list(T).
 
-_player_type(X) :- X = _player_type(_, _, _, _, _, _).
-_player_type(Hand, Library, Graveyard, Lifecount, ManaPool, PCounters) :-
+_command_elem_list([]).
+_command_elem_list([H|T]) :- _command_elem_type(H), _command_elem_list(T).
+_command_elem_type(X) :- _emblem_type(X).
+_command_elem_type(X) :- _card_type(X).
+
+_player_type(X) :- X = _player(_, _, _, _, _, _), X.
+_player(Hand, Library, Graveyard, Lifecount, ManaPool, PCounters) :-
     _card_list(Hand),
     _card_list(Library),
     _card_list(Graveyard),
@@ -32,16 +38,17 @@ _player_type(Hand, Library, Graveyard, Lifecount, ManaPool, PCounters) :-
 _pcounter_list([]).
 _pcounter_list([H|T]) :- _pcounter_type(H), _pcounter_list(T).
 
-_spell_type(X) :- X = _spell_type(_, _, _, _).
-_spell_type(X, Controller, Owner, Targets) :-
-    X = _card_type(_, _, _, _, _, E, _),
+_spell_type(X) :- X = _spell(_, _, _, _), X.
+_spell(X, Controller, Owner, Targets) :-
+    _card_type(X),
+    X = _card(_, _, _, _, _, E, _),
     _player_type(Controller),
     _player_type(Owner),
     _len(Targets, N),
     _len(E, N).
 
-_ability_type(X) :- X = _ability_type(_, _, _).
-_ability_type(Effects, Controller, Targets) :-
+_ability_type(X) :- X = _ability(_, _, _), X.
+_ability(Effects, Controller, Targets) :-
     _effect_list(Effects),
     _player_type(Controller),
     _len(Effects, N),
@@ -52,8 +59,8 @@ _effect_list([H|T]) :- _effect_type(H), _effect_list(T).
 _effect_type(draw).
 _effect_type(discard).
 
-_card_type(X) :- X = _card_type(_, _, _, _, _, _, _).
-_card_type(Name, Cost, Supertypes, Types, Subtypes, Effects, Owner) :-
+_card_type(X) :- X = _card(_, _, _, _, _, _, _), X.
+_card(Name, Cost, Supertypes, Types, Subtypes, Effects, Owner) :-
     _mana_list(Cost),
     _supertype_list(Supertypes),
     _type_list_ne(Type),
@@ -69,13 +76,13 @@ _type_list_ne([H|T]) :- _type_type(H), _type_list_ne(T).
 _subtype_list([]).
 _subtype_list([H|T]) :- _subtype_type(H), _subtype_list(T).
 
-_emblem_type(X) :- X = _emblem_type(_, _, _).
-_emblem_type(Effects, Controller, Owner) :-
+_emblem_type(X) :- X = _emblem(_, _, _), X.
+_emblem(Effects, Controller, Owner) :-
     _effect_list(Effects),
     _player_type(Controller),
     _player_type(Owner).
 
-_permanent_type(X) :- X = _permanent_type(_, _, _, _).
+_permanent_type(X) :- X = _permanent(_, _, _, _), X.
 _permanent_type(X, BCounters, Controller, Tapped) :-
     _permanent_card_type(X),
     _bcounter_list(BCounters),
@@ -96,8 +103,8 @@ _permanent_card_type(Card) :-
     Card = _card_type(_, _, _, L, _, _, _),
     _contain(L, [artifact, creature, enchantment, land, planeswalker, tribal]).
 
-_token_type(X) :- X = _token_type(_, _, _, _, _, _, _).
-_token_type(Name, Cost, Supertypes, Types, Subtypes, Effects, Owner) :-
+_token_type(X) :- X = _token(_, _, _, _, _, _, _).
+_token(Name, Cost, Supertypes, Types, Subtypes, Effects, Owner) :-
     _mana_list(Cost),
     _supertype_list(Supertypes),
     _types_list(Types),
@@ -127,53 +134,100 @@ _len([], 0).
 _len([H|T], N) :- _len(T, N1), N is N1 + 1.
 
 _equal_change(X, X, Y, Y).
-_equal_change(X, Y, Z, Y). 
+_equal_change(X, Y, Z, Y).
+
+% _transition(S, swap, [X, Y], SN) :-
+%     S = _state_type(Stack, Exile, Command, Battlefield, Ante, Players, Phases, ActivePlayer),
+%     _swap(X, Y, Stack, StackN),
+%     _swap(X, Y, Exile, ExileN),
+%     _swap(X, Y, Command, Command)
 
 _transition(S, draw, [P], SN) :-
-    S = _state_type(St, E, C, B, A, Ps, Ph, Ap),
+    _state_type(S),
+    _player_type(P),
+    S = _state(St, E, C, B, A, Ps, Ph, Ap),
     _member(P, Ps),
-    P = _player_type(H, [D|L], G, Li, M, Pc),
-    PN = _player_type([D|H], L, G, Li, M, Pc),
+    P = _player(H, [D|L], G, Li, M, Pc),
+    PN = _player([D|H], L, G, Li, M, Pc),
+    _player_type(PN),
     _swap(P, PN, Ps, PNs),
     _equal_change(P, Ap, PN, ApN),
-    SN = _state_type(St, E, C, B, A, PNs, Ph, ApN).
+    SN = _state(St, E, C, B, A, PNs, Ph, ApN),
+    _state_type(SN).
 
 _transition(S, discard, [P], SN) :-
     _transition(S, discard, [P, _], SN).
 
 _transition(S, discard, [P, C], SN) :-
-    S = _state_type(St, E, Cz, B, A, Ps, Ph, Ap),
+    _state_type(S),
+    _player_type(P),
+    S = _state(St, E, Cz, B, A, Ps, Ph, Ap),
     _member(P, Ps),
-    P = _player_type(H, L, G, Li, M, Pc),
+    P = _player(H, L, G, Li, M, Pc),
     _member(C, H),
     _select(C, H, HN),
-    PN = _player_type(HN, L, [C|G], Li, M, Pc),
+    PN = _player(HN, L, [C|G], Li, M, Pc),
+    _player_type(PN), 
     _swap(P, PN, Ps, PNs),
     _equal_change(P, Ap, PN, ApN),
-    SN = _state_type(St, E, Cz, B, A, PNs, Ph, ApN).
+    SN = _state(St, E, Cz, B, A, PNs, Ph, ApN),
+    _state_type(SN).
 
 _transition(S, phase, [], SN) :-
-    S = _state_type([], E, C, B, A, [P|Ps], [upkeep], P),
-    SS = _state_type([], E, C, B, A, [P|Ps], [draw], P),
-    _transition(SS, draw, [P], SN).
+    _state_type(S),
+    S = _state([], E, C, B, A, [P|Ps], [upkeep], P),
+    SS = _state([], E, C, B, A, [P|Ps], [draw], P),
+    _state_type(SS),
+    _transition(SS, draw, [P], SN),
+    _state_type(SN).
 
 _transition(S, phase, [], SN) :-
-    S = _state_type([], E, C, B, A, [P1, P2|T], [cleanup], P1),
+    _state_type(S),
+    S = _state([], E, C, B, A, [P1, P2|T], [cleanup], P1),
     _snoc(T, P1, TN),
-    SN = _state_type([], E, C, B, A, [P2|TN], [untap], P2).
+    SN = _state([], E, C, B, A, [P2|TN], [untap], P2),
+    _state_type(SN).
 
 % Also end EOT effects and remove damage
 _transition(S, phase, [], SN) :-
-    S = _state_type([], E, C, B, A, [P|Ps], [end], P),
-    P = _player_type(H, _, _, _, _, _),
+    _state_type(S),
+    S = _state([], E, C, B, A, [P|Ps], [end], P),
+    P = _player(H, _, _, _, _, _),
     _len(H, N),
     N < 2,
-    SN = _state_type([], E, C, B, A, [P|Ps], [cleanup], P).
+    SN = _state([], E, C, B, A, [P|Ps], [cleanup], P),
+    _state_type(SN).
 _transition(S, phase, [], SN) :-
-    S = _state_type([], _, _, _, _, _, [end], P),
-    P = _player_type(H, _, _, _, _, _),
+    _state_type(S),
+    S = _state([], _, _, _, _, _, [end], P),
+    P = _player(H, _, _, _, _, _),
     _len(H, N),
     N > 1,
     _select(Cn, H, _),
     _transition(S, discard, [P, Cn], SS),
-    _transition(SS, phase, [], SN).
+    _transition(SS, phase, [], SN),
+    _state_type(SN).
+
+_transition(S, resolve, [], SN) :-
+    _state_type(S),
+    S = _state([Sp|St], E, C, B, A, P, Ph, Ap),
+    Sp = _spell(_, _, _, []),
+    _spell_type(Sp),
+    SN = _state(St, E, C, B, A, P, Ph, Ap),
+    _state_type(SN).
+
+_transition(S, resolve, [], SN) :-
+    _state_type(S),
+    S = _state([Sp|_], _, _, _, _, _, _, _),
+    Sp = _spell(C, Cn, Ow, [T|Ts]),
+    C = _card(N, Co, SupT, Ty, SubT, [Ef|Es], OwC),
+    _transition(S, Ef, [T], SS),
+    SS = _state([Sp|St], E, Cz, B, A, Ps, Ph, Ap),
+    _state_type(SS),
+    CN = _card(N, Co, SupT, Ty, SubT, Es, OwC),
+    _card_type(CN),
+    SpN = _spell(CN, Cn, Ow, Ts),
+    _spell_type(SpN),
+    SSS = _state([SpN|St], E, Cz, B, A, Ps, Ph, Ap),
+    _state_type(SSS),
+    _transition(SSS, resolve, [], SN).
