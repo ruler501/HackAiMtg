@@ -141,18 +141,14 @@ cost(dictate_of_erebos, [1,1,1,b,b]).
 type(dictate_of_erebos, enchantment).
 effects(dictate_of_erebos, []).
 
-_mana(1).
-_mana(w).
-_mana(u).
-_mana(b).
-_mana(r).
-_mana(g).
-_mana(c).
-
 controller(capsize, jim).
+owner(capsize, jim).
 controller(abolish, jim).
+owner(abolish, jim).
 controller(memnarch, jim).
+owner(memnarch, jim).
 bcounters(memnarch, []).
+owner(arcanis_the_omnipotent, jim).
 
 hand(jim, []).
 library(jim, [jace_the_living_guildpact]).
