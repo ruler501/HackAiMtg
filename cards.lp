@@ -51,16 +51,22 @@ _pcounter_type(experience).
 
 _bcounter_type(popo).
 
-?- V = _card('Ornithopter', [], [], [creature], [], [], nil),
-     C3 = _card('Ancestral Recall', [u], [], [instant], [], [draw, draw, draw], nil),
+?- V = _card('Ornithopter', [], [], [creature], [], []),
+     C3 = _card('Ancestral Recall', [u], [], [instant], [], [draw, draw, draw]),
      Sp = _spell(C3, P, P, [P, P, P]),
      P = _player([], [V,V,V], [], 40, [], []),
      P2 = _player([], [], [], 40, [], []),
-     S = _state([Sp], [], [], [], [], [P,P2], [end], P),
+     S = _state([Sp], [], [], [], [], [P], [end], P),
      _state_type(S),
-     _transition(S, draw, [P], SN),
-     SN = _state(_, _, _, _, _, _, _, PN),
-     _transition(SN, discard, [PN], SNN).
+     
+     % _player_list_ne
+     % _deepswap(P, P2, S, SN).
+     % _player_list_ne([P]),
+     % _equal_change(P, P2, P, NP),
+     % _deepswap(X, Y, [], []),
+     % _player_list_ne([NP|[]]).
+     % _deepcopy(P, P2, [P,P2], SN).
+     _transition(S, resolve, [], SN).
     
 
 % # % ?-     C3 = _card_type('Ancestral Recall', [u], [], [instant], [], [draw, draw, draw], nil),
