@@ -1,60 +1,62 @@
 #include 'cards.lp'.
 
 _name(X) :- name(X, _).
-_cost(X) :- cost(X, _).
 _type(X) :- type(X, _).
-_abilities(X) :- abilities(X, _).
+_effects(X) :- effects(X, _).
 _lifecount(X) :- lifecount(X, _).
-_manapool(X) :- manapool(X, _).
-_controller(X) :- controller(X, _).
-%Eventually need to add owners
-%Eventually need to add tapped
+% Eventually need to add owners
+% Eventually need to add tapped
+% Eventually need to define mana pools
 
-_bcounters(X) :- counters(X, []).
 _bcounters(X) :- counters(X, L), _bcounter_list(L).
 
 _bcounter_list([]).
 _bcounter_list([H|T]) :- _bcounter(H), _bcounter_list(T).
 
-_pcounters(X) :- counters(X, []).
 _pcounters(X) :- counters(X, L), _pcounter_list(L).
 
 _pcounter_list([]).
 _pcounter_list([H|T]) :- _pcounter(H), _pcounter_list(T).
 
+_manapool(X) :- manapool(X, L), _mana_list(L).
+
+_cost(X) :- cost(X, L), _mana_list(L).
+
+_mana_list([]).
+_mana_list([H|T]) :- _mana(H), _mana_list(T).
+
+_controller(X) :- controller(X, P), _player(P).
+
 _card(X) :-
     _name(X),
     _cost(X),
     _type(X),
-    _abilities(X).
-
-_card(X) :- morph(X).
+    _effects(X).
 
 _token(X) :-
     _name(X),
     _cost(X),
     _type(X),
-    _abilities(X),
+    _effects(X),
     not _card(X).
 
-_permanent(X) :- _card(X), type(X, artifact).
-_permanent(X) :- _card(X), type(X, creature).
-_permanent(X) :- _card(X), type(X, enchantment).
-_permanent(X) :- _card(X), type(X, land).
-_permanent(X) :- _card(X), type(X, planeswalker).
-_permanent(X) :- morph(X).
+_permanent_card(X) :- _card(X), type(X, artifact).
+_permanent_card(X) :- _card(X), type(X, creature).
+_permanent_card(X) :- _card(X), type(X, enchantment).
+_permanent_card(X) :- _card(X), type(X, land).
+_permanent_card(X) :- _card(X), type(X, planeswalker).
 
 _spell(X) :- 
     _card(X),
     _controller(X).
 
 _ability(X) :-
-    _abilities(X),
+    _effects(X),
     _controller(X),
     not _name(X).
 
 _emblem(X) :-
-    _abilities(X),
+    _effects(X),
     _controller(X),
     not _name(X).
 
@@ -78,8 +80,11 @@ _command([]).
 _command([H|T]) :- _card(H), _command(T).
 _command([H|T]) :- _emblem(H), _command(T).
 
+_permanent(X) :- _permanent_card(X), _bcounters(X), _controller(X).
+_permanent(X) :- _token(X), _bcounters(X), _controller(X).
+
 _battlefield([]).
-_battlefield([H|T]) :- _permanent(H), _bcounters(H), _controller(H), _battlefield(T).
+_battlefield([H|T]) :- _permanent(X),  _battlefield(T).
 
 _ante([]).
 _ante([H|T]) :- _card(H), _ante(T).
