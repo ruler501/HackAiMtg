@@ -152,19 +152,18 @@ _mana(c).
 controller(capsize, jim).
 controller(abolish, jim).
 controller(memnarch, jim).
-counters(memnarch, []).
+bcounters(memnarch, []).
 
-player_hand(jim, []).
-player_library(jim, [jace_the_living_guildpact]).
-player_graveyard(jim, [dictate_of_erebos]).
+hand(jim, []).
+library(jim, [jace_the_living_guildpact]).
+graveyard(jim, [dictate_of_erebos]).
 lifecount(jim, 200).
-counters(jim, []).
+pcounters(jim, []).
 manapool(jim, [C,C,C,C,C,C,C,C,C]).
 
-?- S = [capsize, abolish],
-E = [],
-C = [arcanis_the_omnipotent],
-B = [memnarch],
-A = [],
-P = [jim],
-_state(S, E, C, B, A, P).
+stack(t, [capsize, abolish]).
+exile(t, []).
+command(t, [arcanis_the_omnipotent]).
+battlefield(t, [memnarch]).
+ante(t, []).
+players(t, [jim]).
