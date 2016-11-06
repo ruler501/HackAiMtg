@@ -14,7 +14,7 @@ _effects(X) :- effects(X, _).
 % Controller Member
 _controller(X) :- controller(X, P), _player_type(P).
 
-% Owner Member(Not currently type checked)
+% Owner Member(Not currently type checked),
 _owner(X) :- owner(X, _).
 owner(X, P) :- library(P, L), member(X, L).
 owner(X, P) :- graveyard(P, G), member(X, G).
@@ -30,6 +30,10 @@ _pcounters(X) :- pcounters(X, L), _pcounter_list(L).
 _pcounter_list([]).
 _pcounter_list([H|T]) :- _pcounter_type(H), _pcounter_list(T).
 
+% Tapped State
+_tapped(X) :- tapped(X, true).
+_tapped(X) :- tapped(X, false).
+
 % Mana Pool and Costs
 % Manapool should not have generic mana in it
 _manapool(X) :- manapool(X, L), _mana_list(L).
@@ -43,6 +47,9 @@ _mana_type(b).
 _mana_type(r).
 _mana_type(g).
 _mana_type(c).
+
+card_type(Owner, Name, Cost, Type, Effects) :- 
+    Cost = manapool_type(L).
 
 % Card
 _card_type(X) :-
@@ -117,7 +124,7 @@ _command_elem_list([H|T]) :- _command_elem_type(H), _command_elem_list(T).
 
 % Permanent
 _permanent_type(X) :- _permanent_card_type(X), _bcounters(X), _controller(X).
-_permanent_type(X) :- _token_type(X), _bcounters(X), _controller(X).
+_permanent_type(X) :- _token_type(X), _bcounters(X), _controller(X), _tapped(X).
 _permanent_list([]).
 _permanent_list([H|T]) :- _permanent_type(H), _permanent_list(T).
 
@@ -154,3 +161,89 @@ _snoc([H|T], X, [H|R]) :- _snoc(T, X, R).
 
 member(X, [X|T]).
 member(X, [Y|T]) :- member(X, T).
+
+swap(_, _, [], []).
+swap(X, Y, [X|T1], [Y|T2]) :- swap(X, Y, [X|T1], [Y|T2]).
+swap(X, Y, [H1|T1], [H1|T2]) :- H1 \= X1, swap(X, Y, T1, T2).
+
+contain([], _).
+contain([H|T], L) :- member(H, L), contain(T, L).
+
+_assertSame([], X, XN).
+_assertSame([stack|T], X, XN) :- 
+    stack(X, E),
+    stack(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([exile|T], X, XN) :- 
+    exile(X, E),
+    exile(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([command|T], X, XN) :- 
+    command(X, E),
+    command(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([battlefield|T], X, XN) :-
+    battlefield(X, E),
+    battlefield(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([ante|T], X, XN) :-
+    ante(X, E),
+    ante(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([players|T], X, XN) :-
+    players(X, E),
+    players(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([hand|T], X, XN) :-
+    hand(X, E),
+    hand(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([library|T], X, XN) :-
+    library(X, E),
+    library(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([graveyard|T], X, XN) :-
+    graveyard(X, E),
+    graveyard(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([lifecount|T], X, XN) :-
+    lifecount(X, E),
+    lifecount(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([manapool|T], X, XN) :-
+    manapool(X, E),
+    manapool(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([pcounters|T], X, XN) :-
+    pcounters(X, E),
+    pcounters(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([bcounters|T], X, XN) :-
+    bcounters(X, E),
+    bcounters(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([controller|T], X, XN) :-
+    controller(X, E),
+    controller(XN, E),
+    _assertSame(T, X, XN).
+_assertSame([tapped|T], X, XN) :-
+    tapped(X, E),
+    tapped(XN, E),
+    _assertSame(T, X, XN).
+
+transition(S, draw, P, SN) :-
+    _state_type(S),
+    _state_type(SN),
+    _player_type(P),
+    _assertSame([stack, exile, battlefield, command, ante], S, SN),
+    players(S, Ps),
+    member(P, Ps),
+    library(P, [C|L]),
+    hand(P, H),
+    hand(PN, [C|H]),
+    library(PN, L),
+    _player_type(PN),
+    assertSame([graveyard, lifecount, manapool, pcounters], P, PN),
+    swap(P, PN, Ps, PNs),
+    players(SN, PNs).
+

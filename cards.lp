@@ -265,7 +265,7 @@ library(jim, [jace_the_living_guildpact]).
 graveyard(jim, [dictate_of_erebos]).
 lifecount(jim, 200).
 pcounters(jim, []).
-manapool(jim, [C,C,C,C,C,C,C,C,C]).
+manapool(jim, [c,c,c,c,c,c,c,c,c]).
 
 stack(t, [capsize, abolish]).
 exile(t, []).
@@ -273,3 +273,8 @@ command(t, [arcanis_the_omnipotent]).
 battlefield(t, [memnarch]).
 ante(t, []).
 players(t, [jim]).
+
+stack(tn, [capsize, abolish]).
+
+hand(jim, [jace_the_living_guildpact]).
+library(jim, []).
