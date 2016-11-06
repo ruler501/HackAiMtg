@@ -58,14 +58,6 @@ _bcounter_type(popo).
      P2 = _player([], [], [], 40, [], []),
      S = _state([Sp], [], [], [], [], [P], [end], P),
      _state_type(S),
-     
-     % _player_list_ne
-     % _deepswap(P, P2, S, SN).
-     % _player_list_ne([P]),
-     % _equal_change(P, P2, P, NP),
-     % _deepswap(X, Y, [], []),
-     % _player_list_ne([NP|[]]).
-     % _deepcopy(P, P2, [P,P2], SN).
      _transition(S, resolve, [], SN).
     
 
