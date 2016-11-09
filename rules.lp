@@ -164,21 +164,3 @@ _transition(S, resolve, [], SN) :-
     _transition(SSS, resolve, [], SN).
 
 
-?- V = _card('Ornithopter', [], [], ['Creature'], [], []),
-     C3 = _card('Ancestral Recall', ['U'], [], ['Instant'], [], [draw, draw, draw]),
-     Sp = _spell(C3, P, P, [P, P, P]),
-     P = _player([], [V,V,V], [], 40, [], []),
-     P2 = _player([], [], [], 40, [], []),
-     S = _state([Sp], [], [], [], [], [P], ['End'], P),
-     _card_type(V),
-     _card_type(C3),
-     _card_list([V,V,V]),
-     _player_type(P),
-     _spell_type(Sp),
-     _player_type(P2),
-     _stack_elem_list([Sp]),
-     _player_list_ne([P]),
-     _phase_list_ne(['End']),
-     _member(P, [P]),
-     _state_type(S),
-     _transition(S, resolve, [], SN).
