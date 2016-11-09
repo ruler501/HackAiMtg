@@ -1,4 +1,4 @@
-*Hack AI MTG*
+Hack AI MTG
 
 A s(ASP) implementation of the Magic: the Gathering rules system, this system supports tracking properties and locations of cards and properties of players. It is capable of correctly rotating turn order and phases as well as resolving basic spells. States of the game are represented by State objects which are described in the `types.h` header. This header is used to automatically generate the code that manages the type system with the `prologTypes.py` script(python 3). Once you have a state you can advance the game state with transitions. The currently supported transitions are `draw` and `discard` to add and remove cards from a given players hand, `phase` to rotate the current phase(only supports specific phase rotations), and `resolve` which resolves a spell and all it's effects which can be arrays of transition functions with arguments specified.
 
