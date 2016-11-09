@@ -1,6 +1,6 @@
 struct State
 {
-    Stack_Elem Stack;
+    Stack_Elem[] Stack;
     Card[] Exile;
     Command_Elem[] Command;
     Permanent[] Battlefield;
@@ -10,16 +10,17 @@ struct State
     // Nonempty
     Phase[] Phases;
     Player ActivePlayer;
+    //! member(ActivePlayer, Players)
 };
 
 union Stack_Elem {
-    Spell spell;
-    Ability ability;
+    Spell Spell;
+    Ability Ability;
 };
 
 union Command_Elem {
-    Card card;
-    Emblem emblem;
+    Card Card;
+    Emblem Emblem;
 };
 
 struct Player
@@ -27,8 +28,7 @@ struct Player
     Card[] Hand;
     Card[] Library;
     Card[] Graveyard;
-    Any lifecount;
-    // Nonempty
+    Any Lifecount;
     Mana[] ManaPool;
     Player_Counter[] Counters;
 };
@@ -100,6 +100,7 @@ enum Phase {
     Cleanup;
 };
 
+// No quote
 enum Effect {
     draw;
     discard;
@@ -122,7 +123,7 @@ struct Ability     // Object on the stack
 
 struct Card
 {
-    any name;
+    any Name;
     Mana[] Cost;
     Supertype[] Supertypes;
     // Nonempty
@@ -134,20 +135,21 @@ struct Card
 struct Emblem
 {
     //Has no name
-    Effect[] effects;
-    Player controller;
+    Effect[] Effects;
+    Player Controller;
     Player Owner;
 };
 
 struct Permanent
 {
     Permanent_Type PermanentType;
-    Battlefield_Counter[] counters;
-    Player controller;
+    Battlefield_Counter[] Counters;
+    Player Controller;
+    Bool Tapped
 };
 
 union Permanent_Type {
-    Permanent_Card PermanentCard;
+    Permanent_Card Permanent_Card;
     Token Token;
 };
 

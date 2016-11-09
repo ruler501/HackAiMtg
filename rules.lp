@@ -1,124 +1,9 @@
-_state_type(X) :- X = _state(S, E, C, B, A, P, Ph, Ap), _state(S, E, C, B, A, P, Ph, Ap).
-_state(Stack, Exile, Command, Battlefield, Ante, Players, Phases, ActivePlayer) :-
-    _stack_elem_list(Stack),
-    _card_list(Exile),
-    _command_elem_list(Command),
-    _permanent_list(Battlefield),
-    _card_list(Ante),
-    _player_list_ne(Players),
-    _phase_list_ne(Phases),
-    _player_type(ActivePlayer),
-    _member(ActivePlayer, Players).
-    
-
-_phase_list_ne([H]) :- _phase_type(H).
-_phase_list_ne([H|T]) :- _phase_type(H), _phase_list_ne(T).
-
-_player_list_ne([H]) :- _player_type(H).
-_player_list_ne([H|P]) :- _player_type(H), _player_list_ne(P).
-
-_card_list([]).
-_card_list([H|T]) :- _card_type(H), _card_list(T).
-
-_stack_elem_type(X) :- _spell_type(X).
-_stack_elem_type(X) :- _ability_type(X).
-_stack_elem_list([]).
-_stack_elem_list([H|T]) :- _stack_elem_type(H), _stack_elem_list(T).
-
-_command_elem_list([]).
-_command_elem_list([H|T]) :- _command_elem_type(H), _command_elem_list(T).
-_command_elem_type(X) :- _emblem_type(X).
-_command_elem_type(X) :- _card_type(X).
-
-_player_type(X) :- X = _player(H, L, G, Lc, M, P), _player(H, L, G, Lc, M, P).
-_player(Hand, Library, Graveyard, _, ManaPool, PCounters) :-
-    _card_list(Hand),
-    _card_list(Library),
-    _card_list(Graveyard),
-    _mana_list(ManaPool),
-    _pcounter_list(PCounters).
-
-_pcounter_list([]).
-_pcounter_list([H|T]) :- _pcounter_type(H), _pcounter_list(T).
-
-_spell_type(X) :- X = _spell(C, Co, Ow, T), _spell(C, Co, Ow, T).
-_spell(S, Controller, Owner, Targets) :-
-    _card_type(S),
-    S = _card(_, _, _, _, _, E),
-    _player_type(Controller),
-    _player_type(Owner),
-    _len(Targets, N),
-    _len(E, N).
-
-_ability_type(X) :- X = _ability(E, C, T), _ability(E, C, T).
-_ability(Effects, Controller, Targets) :-
-    _effect_list(Effects),
-    _player_type(Controller),
-    _len(Effects, N),
-    _len(Targets, N).
-
-_effect_list([]).
-_effect_list([H|T]) :- _effect_type(H), _effect_list(T).
-_effect_type(draw).
-_effect_type(discard).
-
-_card_type(X) :- X = _card(N, C, S, T, Su, E), _card(N, C, S, T, Su, E).
-_card(_, Cost, Supertypes, Types, Subtypes, Effects) :-
-    _mana_list(Cost),
-    _supertype_list(Supertypes),
-    _type_list_ne(Types),
-    _subtype_list(Subtypes),
-    _effect_list(Effects).
-
-_supertype_list([]).
-_supertype_list([H|T]) :- _supertype_type(H), _supertype_list(T).
-
-_type_list_ne([H]) :- _type_type(H).
-_type_list_ne([H|T]) :- _type_type(H), _type_list_ne(T).
-
-_subtype_list([]).
-_subtype_list([H|T]) :- _subtype_type(H), _subtype_list(T).
-
-_emblem_type(X) :- X = _emblem(E, C, O), _emblem(E, C, O).
-_emblem(Effects, Controller, Owner) :-
-    _effect_list(Effects),
-    _player_type(Controller),
-    _player_type(Owner).
-
-_permanent_type(X) :- X = _permanent(P, B, C, T), _permanent(P, B, C, T).
-_permanent_type(P, BCounters, Controller, Tapped) :-
-    _permanent_card_type(P),
-    _bcounter_list(BCounters),
-    _player_type(Controller),
-    _bool_type(Tapped).
-_permanent_type(X, BCounters, Controller, Tapped) :-
-    _token_type(X),
-    _bcounter_list(BCounters),
-    _player_type(Controller),
-    _bool_type(Tapped).
-_permanent_list([]).
-_permanent_list([H|T]) :- _permanent_type(H), _permanent_list(T).
-
-_bcounter_list([]).
-_bcounter_list([H|T]) :- _bcounter_type(H), _bcounter_list(T).
-_bool_type(true).
-_bool_type(false).
+#include 'types.lp'.
 
 _permanent_card_type(Card) :-
     _card_type(Card),
     Card = _card(_, _, _, L, _, _),
     _contain(L, [artifact, creature, enchantment, land, planeswalker, tribal]).
-
-_token_type(X) :- X = _token(N, C, S, T, Su, E, O), _token(N, C, S, T, Su, E, O).
-_token(_, Cost, Supertypes, Types, Subtypes, Effects, _) :-
-    _mana_list(Cost),
-    _supertype_list(Supertypes),
-    _types_list(Types),
-    _subtypes_list(Subtypes),
-    _effect_list(Effects).
-
-_mana_list([]).
-_mana_list([H|T]) :- _mana_type(H), _mana_list(T).
 
 % Utility Functions
 _snoc([], H, [H]).
@@ -277,3 +162,23 @@ _transition(S, resolve, [], SN) :-
     SSS = _state([SpN|St], E, Cz, B, A, Ps, Ph, Ap),
     _state_type(SSS),
     _transition(SSS, resolve, [], SN).
+
+
+?- V = _card('Ornithopter', [], [], ['Creature'], [], []),
+     C3 = _card('Ancestral Recall', ['U'], [], ['Instant'], [], [draw, draw, draw]),
+     Sp = _spell(C3, P, P, [P, P, P]),
+     P = _player([], [V,V,V], [], 40, [], []),
+     P2 = _player([], [], [], 40, [], []),
+     S = _state([Sp], [], [], [], [], [P], ['End'], P),
+     _card_type(V),
+     _card_type(C3),
+     _card_list([V,V,V]),
+     _player_type(P),
+     _spell_type(Sp),
+     _player_type(P2),
+     _stack_elem_list([Sp]),
+     _player_list_ne([P]),
+     _phase_list_ne(['End']),
+     _member(P, [P]),
+     _state_type(S),
+     _transition(S, resolve, [], SN).
