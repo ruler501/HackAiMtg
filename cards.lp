@@ -58,9 +58,7 @@ _bcounter_type(popo).
      P2 = _player([], [], [], 40, [], []),
      S = _state([Sp], [], [], [], [], [P], [end], P),
      _state_type(S),
-     _transition(S, resolve, [], SN).
+     _transition(S, resolve, [], SN),
+     _transition(SN, phase, [], SNN).
     
 
-% # % ?-     C3 = _card_type('Ancestral Recall', [u], [], [instant], [], [draw, draw, draw], nil),
-% # %      S = _spell_type(C3, P, P, [P, P, P]),
-% # %      P = _player_type([], [C3, C3, C3], [], 40, [], []).

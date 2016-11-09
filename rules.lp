@@ -231,7 +231,7 @@ _transition(S, phase, [], SN) :-
     S = _state([], E, C, B, A, [P|Ps], [end], P),
     P = _player(H, _, _, _, _, _),
     _len(H, N),
-    N < 2,
+    N < 8,
     SN = _state([], E, C, B, A, [P|Ps], [cleanup], P),
     _state_type(SN).
 _transition(S, phase, [], SN) :-
@@ -239,7 +239,7 @@ _transition(S, phase, [], SN) :-
     S = _state([], _, _, _, _, _, [end], P),
     P = _player(H, _, _, _, _, _),
     _len(H, N),
-    N > 1,
+    N > 7,
     _select(Cn, H, _),
     _transition(S, discard, [P, Cn], SS),
     _transition(SS, phase, [], SN),
@@ -249,9 +249,16 @@ _transition(S, resolve, [], SN) :-
     _state_type(S),
     S = _state([Sp|St], E, C, B, A, P, Ph, Ap),
     _spell_type(Sp),
-    Sp = _spell(_, _, _, []),
-    SN = _state(St, E, C, B, A, P, Ph, Ap),
+    Sp = _spell(Cd, _, O, []),
+    _player_type(O),
+    _card_type(Cd),
+    O = _player(H, L, G, Lc, M, Pc),
+    ON = _player(H, L, [Cd|G], Lc, M, Pc), 
+    SS = _state(St, E, C, B, A, P, Ph, Ap),
+    _state_type(SS),
+    _deepswap(O, ON, SS, SN),
     _state_type(SN).
+
 _transition(S, resolve, [], SN) :-
     _state_type(S),
     S = _state([Sp|_], _, _, _, _, _, _, _),
